@@ -1,0 +1,24 @@
+{
+    "name": "socketio-proxy",
+    "version": "1.0.0",
+    "description": "websoket proxy",
+    "main": "index.js",
+    "scripts": {
+        "start": "bash ./init.sh",
+        "mock": "cd ./socketio-mock-server && gulp",
+        "proxy": "cd ./socketio-proxy && gulp"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/greengerong/socketio-proxy.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/greengerong/socketio-proxy/issues"
+    },
+    "homepage": "https://github.com/greengerong/socketio-proxy#readme",
+    "devDependencies": {
+
+    }
+}

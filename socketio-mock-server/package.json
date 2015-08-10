@@ -21,7 +21,12 @@
         "express": "4.6.1",
         "jade": "1.4.2"
     },
-    "devDependencies": {},
+    "devDependencies": {
+        "babel": "^5.8.21",
+        "gulp": "^3.9.0",
+        "gulp-babel": "^5.2.0",
+        "gulp-nodemon": "^2.0.3"
+    },
     "bundleDependencies": [],
     "license": "MIT",
     "main": "server.js"
