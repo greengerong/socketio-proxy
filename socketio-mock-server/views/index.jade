@@ -1,0 +1,20 @@
+doctype html
+html
+  head
+    link(rel='stylesheet', href='http://fonts.googleapis.com/css?family=Open+Sans')
+    link(rel='stylesheet', href='/css/style.css')
+    script(src='//code.jquery.com/jquery-1.11.0.min.js')
+    script(src='http://127.0.0.1:8080/socket.io/socket.io.js')
+    script(src='/js/index.js')
+    title Super Awesome Chatroom
+  body
+    h1 socketio client demo
+    div
+        form#messageForm
+          select#type
+            option(value='recommandation', selected) recommandation
+            option(value='comment') comment
+          input(type="text", placeholder='input your message')#message
+          input(type="button", value="emit")#send
+    h2 Response:          
+    div#response

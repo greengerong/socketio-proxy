@@ -1,0 +1,4 @@
+socketio-mock-server/node_modules
+socketio-proxy/node_modules
+*.iml
+.idea

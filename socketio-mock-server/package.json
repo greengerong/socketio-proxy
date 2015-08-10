@@ -1,0 +1,28 @@
+{
+    "name": "socketio-mock-server",
+    "version": "1.0.0",
+    "description": "mock server",
+    "keywords": [
+        "express",
+        "Node.js",
+        "socket.io",
+        "underscore",
+        "chatroom"
+    ],
+    "author": {},
+    "homepage": "",
+    "repository": {},
+    "engines": {
+        "node": ">= 0.6.0",
+        "npm": ">= 1.0.0"
+    },
+    "dependencies": {
+        "body-parser": "1.4.3",
+        "express": "4.6.1",
+        "jade": "1.4.2"
+    },
+    "devDependencies": {},
+    "bundleDependencies": [],
+    "license": "MIT",
+    "main": "server.js"
+}
