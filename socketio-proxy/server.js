@@ -73,8 +73,8 @@ io.on("connection", function(socket) {
                     error: err
                 });
             }
-
-            if (!result.room) {
+            var notify = result.notify;
+            if (!notify.room) {
                 var msg = 'No room for this socket!';
                 return socket.emit(join.src + '-error', {
                     success: false,
@@ -82,12 +82,12 @@ io.on("connection", function(socket) {
                 });
             }
 
-            socket.join(result.room);
-            var msg = 'User join room ' + result.room;
+            socket.join(notify.room);
+            var msg = 'User join room ' + notify.room;
             console.log(msg);
             socket.emit(join.src, {
                 success: true,
-                room: result.room
+                room: notify.room
             });
         });
 
@@ -106,8 +106,8 @@ io.on("connection", function(socket) {
                     return socket.emit(item.src + '-error', err);
                 }
 
-
-                if (!result.room) {
+                var notify = result.notify;
+                if (!notify.room) {
                     var msg = 'No room for to emit!';
                     return socket.emit(join.src + '-error', {
                         success: false,
@@ -115,8 +115,8 @@ io.on("connection", function(socket) {
                     });
                 }
 
-                io.to(result.room).emit(item.src, result.data);
-                var msg = 'emit data to room ' + result.room;
+                io.to(notify.room).emit(item.src, result.data);
+                var msg = 'emit data to room ' + notify.room;
                 console.log(msg);
                 socket.emit(join.src, {
                     success: true,
