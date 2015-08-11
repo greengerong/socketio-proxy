@@ -13,3 +13,12 @@ run proxy server :
 run mock demo server :
 
 	npm run mock
+
+
+Task:
+
+1. socket connection auth.
+
+2. change to good log lib.
+
+3. think about the proxy http request need others http method(GET, PUT, DELETE)?
