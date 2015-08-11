@@ -17,13 +17,20 @@ if (process.env.setting && process.env.setting) {
     app.set("proxySetting", require(process.env.setting || {}));
 }
 
-app.set("views", __dirname + "/views");
-app.set("view engine", "jade");
 app.use(bodyParser.json());
 
 
 app.get("/", function(req, res) {
-    res.render("index");
+    res.send({
+        name: 'socketio proxy',
+        alive: true,
+        script: req.protocol + '://' + req.get('Host') + req.url + "socket.io/socket.io.js",
+        author: {
+            name: 'greengerong',
+            github: 'https://github.com/greengerong/',
+            blog: 'http://www.greengerong.com/'
+        }
+    });
 });
 
 app.post("/api/vi/notification", function(req, res) {
