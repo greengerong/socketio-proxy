@@ -36,7 +36,7 @@ app.get("/", function(req, res) {
 var setting = app.get("proxySetting") || {},
     notification = setting.notification || {};
 if (notification.enable === true) {
-    app.post("/api/vi/notification", function(req, res, next) {
+    app.post("/api/v1/notification", function(req, res, next) {
         if (notification.token && req.headers[notification.tokenName || 'proxy-token'] !== notification.token) {
 
             var getClientIp = function(req) {
