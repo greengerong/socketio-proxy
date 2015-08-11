@@ -3,7 +3,6 @@ var express = require("express"),
     http = require("http").createServer(app),
     bodyParser = require("body-parser"),
     _ = require('lodash'),
-    fs = require('fs'),
     io = require("socket.io").listen(http, {
         // origins: '*:*'
     }),
@@ -12,8 +11,6 @@ var express = require("express"),
 app.set("ipaddr", process.env.ip || "127.0.0.1");
 app.set("port", process.env.port || 8080);
 if (process.env.setting && process.env.setting) {
-    // var settingJson = fs.readFileSync(process.env.setting, "utf8");
-    // app.set("proxySetting", JSON.parse(settingJson) || {});
     app.set("proxySetting", require(process.env.setting || {}));
 }
 
