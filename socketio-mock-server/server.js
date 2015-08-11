@@ -27,7 +27,7 @@ var resRoom = 'room1';
 app.post("/joinRoom", function(req, res) {
     console.log('In test server api joinRoom', req.body);
     res.send({
-        room: req.body.data.roomId
+        room: req.body.room
     });
 });
 
@@ -37,8 +37,8 @@ app.post("/recommandation", function(req, res) {
     //     error: 'Something blew up!'
     // });
     res.send({
-        room: req.body.data.roomId,
-        data: req.body.data
+        room: req.body.room,
+        data: req.body
     });
 
 });
@@ -46,8 +46,8 @@ app.post("/recommandation", function(req, res) {
 app.post("/comment", function(req, res) {
     console.log('In test server api comment', req.body);
     res.send({
-        room: req.body.data.roomId,
-        data: req.body.data
+        room: req.body.room,
+        data: req.body
     });
 });
 

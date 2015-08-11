@@ -1,14 +1,21 @@
 function init() {
 
-    var roomId = window.location.search.match(/room=(\d+)/)[1] || 123,
+    var room = window.location.search.match(/room=(\d+)/)[1] || 123,
         socket = io.connect('http://127.0.0.1:8080', {
             port: 8080,
             rememberTransport: false
         });
 
-    socket.on('communicate', function(data) {
-        console.log('got data from node proxy ', data);
-        $('#response').append('<p>Got message from server :<pre>' +
+    socket.on('recommandation', function(data) {
+        console.log('got recommandation from node proxy ', data);
+        $('#response').append('<p>Got recommandation from server :<pre>' +
+            JSON.stringify(data) +
+            '</pre></p><hr/>');
+    });
+
+    socket.on('comment', function(data) {
+        console.log('got comment data from node proxy ', data);
+        $('#response').append('<p>Got comment from server :<pre>' +
             JSON.stringify(data) +
             '</pre></p><hr/>');
     });
@@ -23,17 +30,14 @@ function init() {
     });
 
     $('#send').on('click', function() {
-        socket.emit('communicate', {
-            type: $('#type').val(),
-            data: {
-                message: $('#message').val(),
-                roomId: roomId
-            }
+        socket.emit($('#type').val(), {
+            message: $('#message').val(),
+            room: room
         });
     });
 
     socket.emit('joinRoom', {
-        roomId: roomId
+        room: room
     });
 }
 

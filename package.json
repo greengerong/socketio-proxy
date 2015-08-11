@@ -18,7 +18,8 @@
         "url": "https://github.com/greengerong/socketio-proxy/issues"
     },
     "homepage": "https://github.com/greengerong/socketio-proxy#readme",
-    "devDependencies": {
+    "devDependencies": {},
+    "dependencies": {
 
     }
 }

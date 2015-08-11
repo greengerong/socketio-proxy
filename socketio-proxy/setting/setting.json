@@ -1,0 +1,14 @@
+{
+    "baseUrl": "http://127.0.0.1:9090/",
+    "join": {
+        "src": "joinRoom",
+        "target": "joinRoom"
+    },
+    "mapping": [{
+        "src": "recommandation",
+        "target": ""
+    }, {
+        "src": "comment",
+        "target": ""
+    }]
+}

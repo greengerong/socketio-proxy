@@ -1,10 +1,8 @@
 var request = require('request');
 
-var baseUrl = 'http://127.0.0.1:9090/';
 
-
-function post(data, done) {
-    request.post(baseUrl + data.type, {
+function post(url, data, done) {
+    request.post(url, {
         json: data
     }, function(err, res, body) {
         if (!err && res.statusCode != 200) {

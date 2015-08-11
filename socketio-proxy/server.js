@@ -2,67 +2,130 @@ var express = require("express"),
     app = express(),
     http = require("http").createServer(app),
     bodyParser = require("body-parser"),
+    _ = require('lodash'),
+    fs = require('fs'),
     io = require("socket.io").listen(http, {
         // origins: '*:*'
     }),
     proxy = require('./proxy');
 
-app.set("ipaddr", "127.0.0.1");
-app.set("port", 8080);
+app.set("ipaddr", process.env.ip || "127.0.0.1");
+app.set("port", process.env.port || 8080);
+if (process.env.setting && process.env.setting) {
+    // var settingJson = fs.readFileSync(process.env.setting, "utf8");
+    // app.set("proxySetting", JSON.parse(settingJson) || {});
+    app.set("proxySetting", require(process.env.setting || {}));
+}
+
 app.set("views", __dirname + "/views");
 app.set("view engine", "jade");
 app.use(bodyParser.json());
-
-// app.use(function(req, res, next) {
-//     res.header("Access-Control-Allow-Origin", "*");
-//     res.header("Access-Control-Allow-Headers", "X-Requested-With");
-//     res.header("Access-Control-Allow-Headers", "Content-Type");
-//     res.header("Access-Control-Allow-Methods", "PUT, GET, POST, DELETE, OPTIONS");
-//     next();
-// });
 
 
 app.get("/", function(req, res) {
     res.render("index");
 });
 
+app.post("/api/vi/notification", function(req, res) {
+    /* {
+         notify: {
+             room: '123',
+             event: 'update-message'
+         },
+         data: {
+             // some data  to notify client
+         }
+     }*/
+    var palyload = req.body,
+        notify = palyload.notify;
+    if (!notify.room || !notify.event) {
+        return res.status(400).send({
+            success: false,
+            message: 'Should given notify client and event name!'
+        });
+    }
+
+    io.to(notify.room).emit(notify.event, palyload.data);
+    res.send({
+        success: true,
+        message: 'Notify the client ' + notify.room + ' (' + notify.event + ') with :' + JSON.stringify(palyload.data) + '!'
+    });
+});
+
 io.on("connection", function(socket) {
+    var setting = app.set("proxySetting"),
+        join = setting.join || {
+            src: 'join'
+        },
+        mapping = setting.mapping || [];
 
-    socket.on("joinRoom", function(data) {
-        console.log('join room', data);
-        proxy({
-            type: 'joinRoom',
-            data: data
-        }, function(err, result) {
+    join.target = join.target || join.src;
+
+    socket.on(join.src, function(data) {
+
+        var url = setting.baseUrl + join.target;
+        console.log('Got ' + join.src + ' will ask server url ' + url, data);
+        proxy(url, data, function(err, result) {
             if (err) {
-                console.log('proxy to server error:', err);
-                return socket.emit('communicate-error', err);
+                console.log('Proxy to server to join room error:', err);
+                return socket.emit(join.src + '-error', {
+                    success: false,
+                    error: err
+                });
             }
 
-            if (result.room) {
-                socket.join(result.room);
-                console.log('user join room' + result.room);
+            if (!result.room) {
+                var msg = 'No room for this socket!';
+                return socket.emit(join.src + '-error', {
+                    success: false,
+                    error: msg
+                });
             }
+
+            socket.join(result.room);
+            var msg = 'User join room ' + result.room;
+            console.log(msg);
+            socket.emit(join.src, {
+                success: true,
+                room: result.room
+            });
         });
 
     });
 
+    _.forEach(mapping, function(item) {
+        item.target = item.target || item.src;
+        var url = setting.baseUrl + item.target;
+        console.log('Socket on event ' + item.src);
+        socket.on(item.src, function(data) {
+            console.log('Got socket event ' + item.src + ' to url ' + url, data);
 
-    socket.on("communicate", function(data) {
-        console.log('communicate message', data);
+            proxy(url, data, function(err, result) {
+                if (err) {
+                    console.log('Proxy to server error:', err);
+                    return socket.emit(item.src + '-error', err);
+                }
 
-        proxy(data, function(err, result) {
-            if (err) {
-                console.log('proxy to server error:', err);
-                return socket.emit('communicate-error', err);
-            }
 
-            if (result.room) {
-                io.to(result.room).emit("communicate", result.data);
-                console.log('emit data to room ' + result.room, result.data);
-            }
+                if (!result.room) {
+                    var msg = 'No room for to emit!';
+                    return socket.emit(join.src + '-error', {
+                        success: false,
+                        error: msg
+                    });
+                }
+
+                io.to(result.room).emit(item.src, result.data);
+                var msg = 'emit data to room ' + result.room;
+                console.log(msg);
+                socket.emit(join.src, {
+                    success: true,
+                    message: msg
+                });
+            });
         });
-    });
+    })
+
 
 
     socket.on("disconnect", function(data) {
