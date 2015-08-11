@@ -1,36 +1,35 @@
 {
-  "name": "socketio-proxy",
-  "version": "1.0.0",
-  "description": "",
-  "keywords": [
-    "express",
-    "Node.js",
-    "socket.io",
-    "underscore",
-    "chatroom"
-  ],
-  "author": {},
-  "homepage": "",
-  "repository": {},
-  "engines": {
-    "node": ">= 0.6.0",
-    "npm": ">= 1.0.0"
-  },
-  "dependencies": {
-    "body-parser": "1.4.3",
-    "express": "4.6.1",
-    "jade": "1.4.2",
-    "lodash": "^3.10.1",
-    "request": "^2.60.0",
-    "socket.io": "1.0.6"
-  },
-  "devDependencies": {
-    "babel": "^5.8.21",
-    "gulp": "^3.9.0",
-    "gulp-babel": "^5.2.0",
-    "gulp-nodemon": "^2.0.3"
-  },
-  "bundleDependencies": [],
-  "license": "MIT",
-  "main": "server.js"
+    "name": "socketio-proxy",
+    "version": "1.0.0",
+    "description": "",
+    "keywords": [
+        "express",
+        "Node.js",
+        "socket.io",
+        "underscore",
+        "chatroom"
+    ],
+    "author": {},
+    "homepage": "",
+    "repository": {},
+    "engines": {
+        "node": ">= 0.6.0",
+        "npm": ">= 1.0.0"
+    },
+    "dependencies": {
+        "body-parser": "1.4.3",
+        "express": "4.6.1",
+        "lodash": "^3.10.1",
+        "request": "^2.60.0",
+        "socket.io": "1.0.6"
+    },
+    "devDependencies": {
+        "babel": "^5.8.21",
+        "gulp": "^3.9.0",
+        "gulp-babel": "^5.2.0",
+        "gulp-nodemon": "^2.0.3"
+    },
+    "bundleDependencies": [],
+    "license": "MIT",
+    "main": "server.js"
 }
