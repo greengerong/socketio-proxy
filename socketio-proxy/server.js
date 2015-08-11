@@ -33,34 +33,55 @@ app.get("/", function(req, res) {
     });
 });
 
-app.post("/api/vi/notification", function(req, res) {
-    /* {
-         notify: {
-             room: '123',
-             event: 'update-message'
-         },
-         data: {
-             // some data  to notify client
-         }
-     }*/
-    var palyload = req.body,
-        notify = palyload.notify;
-    if (!notify.room || !notify.event) {
-        return res.status(400).send({
-            success: false,
-            message: 'Should given notify client and event name!'
-        });
-    }
+var setting = app.get("proxySetting") || {},
+    notification = setting.notification || {};
+if (notification.enable === true) {
+    app.post("/api/vi/notification", function(req, res, next) {
+        if (notification.token && req.headers[notification.tokenName || 'proxy-token'] !== notification.token) {
 
-    io.to(notify.room).emit(notify.event, palyload.data);
-    res.send({
-        success: true,
-        message: 'Notify the client ' + notify.room + ' (' + notify.event + ') with :' + JSON.stringify(palyload.data) + '!'
+            var getClientIp = function(req) {
+                return req.headers['x-forwarded-for'] ||
+                    req.connection.remoteAddress ||
+                    req.socket.remoteAddress ||
+                    req.connection.socket.remoteAddress;
+            };
+            console.log('Wrong notification from ' + getClientIp(req));
+            res.status(401).send({
+                success: false,
+                error: 'Wrong notification!'
+            })
+        }
+
+        next();
+    }, function(req, res) {
+        /* {
+             notify: {
+                 room: '123',
+                 event: 'update-message'
+             },
+             data: {
+                 // some data  to notify client
+             }
+         }*/
+        var palyload = req.body,
+            notify = palyload.notify;
+        if (!notify.room || !notify.event) {
+            return res.status(400).send({
+                success: false,
+                message: 'Should given notify client and event name!'
+            });
+        }
+
+        io.to(notify.room).emit(notify.event, palyload.data);
+        res.send({
+            success: true,
+            message: 'Notify the client ' + notify.room + ' (' + notify.event + ') with :' + JSON.stringify(palyload.data) + '!'
+        });
     });
-});
+}
 
 io.on("connection", function(socket) {
-    var setting = app.set("proxySetting"),
+    var setting = app.get("proxySetting") || {},
         join = setting.join || {
             src: 'join'
         },

@@ -1,5 +1,10 @@
 {
     "baseUrl": "http://127.0.0.1:9090/",
+    "notification": {
+        "enable": true,
+        "tokenName": "proxy-token",
+        "token": "9090950"
+    },
     "join": {
         "src": "joinRoom",
         "target": "joinRoom"
