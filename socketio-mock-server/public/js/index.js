@@ -1,6 +1,6 @@
 function init() {
 
-    var assessmentId = 123,
+    var roomId = window.location.search.match(/room=(\d+)/)[1] || 123,
         socket = io.connect('http://127.0.0.1:8080', {
             port: 8080,
             rememberTransport: false
@@ -27,13 +27,13 @@ function init() {
             type: $('#type').val(),
             data: {
                 message: $('#message').val(),
-                assessmentId: assessmentId
+                roomId: roomId
             }
         });
     });
 
     socket.emit('joinRoom', {
-        assessmentId: assessmentId
+        roomId: roomId
     });
 }
 
