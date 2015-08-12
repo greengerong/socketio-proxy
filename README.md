@@ -15,3 +15,8 @@ run mock demo server :
 	npm run mock
 
 
+Task:
+
+* think about the proxy http request need others http method(GET, PUT, DELETE)?
+
+* document should be update.
