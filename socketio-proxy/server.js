@@ -107,10 +107,14 @@ io.on("connection", function(socket) {
     socket.on(join.src, function(data) {
 
         var url = setting.baseUrl + join.target;
-        log.info(data, 'Got %s will ask server url %s', join.src, url);
+        log.info({
+            data: data
+        }, 'Got %s will ask server url %s', join.src, url);
         proxy(url, data, function(err, result) {
             if (err) {
-                log.error(err, 'Proxy to server to join room error.');
+                log.error({
+                    error: err
+                }, 'Proxy to server to join room error.');
                 return socket.emit(join.src + '-error', {
                     success: false,
                     error: err
@@ -119,7 +123,9 @@ io.on("connection", function(socket) {
             var notify = result.notify;
             if (!notify.identity) {
                 var msg = 'The server api didn\'t given identity to this socket!';
-                log.info(notify, msg);
+                log.info({
+                    notify: notify
+                }, msg);
                 return socket.emit(join.src + '-error', {
                     success: false,
                     error: msg
@@ -161,11 +167,15 @@ io.on("connection", function(socket) {
                 });
             }
             authentificationSockets[data.token] = socket;
-            log.info(data, 'Got socket event %s to url %s.', item.src, url);
+            log.info({
+                data: data
+            }, 'Got socket event %s to url %s.', item.src, url);
 
             proxy(url, data, function(err, result) {
                 if (err) {
-                    log.error(err, 'API service response error on %s event.', item.src);
+                    log.error({
+                        error: err
+                    }, 'API service response error on %s event.', item.src);
                     return socket.emit(item.src + '-error', err);
                 }
 
@@ -179,12 +189,16 @@ io.on("connection", function(socket) {
                             }).emit(item.src, result.data);
                         }).value()
 
-                    log.info(notify, 'Emit data to identitys %s', notify.identitys);
+                    log.info({
+                        notify: notify
+                    }, 'Emit data to identitys %s', notify.identitys);
                 }
 
                 if (notify.room) {
                     io.to(notify.room).emit(item.src, result.data);
-                    log.info(notify, 'Emit data to room ' + notify.room);
+                    log.info({
+                        notify: notify
+                    }, 'Emit data to room ' + notify.room);
                 }
 
                 if ((!notify.identitys || !notify.identitys.lenth) && !notify.room) {
@@ -222,9 +236,17 @@ io.on("connection", function(socket) {
 
     //settimeout remove identity is null;
     setTimeout(function() {
-
+        _.chain(authentificationSockets || {})
+            .forEach(function(value, key) {
+                if (!value) {
+                    delete authentificationSockets[key];
+                    log.info({
+                        token: key
+                    }, 'Remove socket %s from authentification sockets.', key);
+                };
+            }).value()
     }, (app.get("proxySetting") || {
-        timeout: 30 * 1000
+        timeout: 10 * 60 * 1000 // 默认10分钟 
     }).timeout);
 
 });
