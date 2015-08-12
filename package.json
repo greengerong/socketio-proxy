@@ -6,7 +6,7 @@
     "scripts": {
         "start": "bash ./init.sh",
         "mock": "cd ./socketio-mock-server && gulp",
-        "proxy": "cd ./socketio-proxy && gulp"
+        "proxy": "cd ./socketio-proxy && gulp | ./node_modules/.bin/bunyan"
     },
     "repository": {
         "type": "git",
