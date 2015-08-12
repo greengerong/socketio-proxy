@@ -17,6 +17,4 @@ run mock demo server :
 
 Task:
 
-* change to good log lib.
-
 * think about the proxy http request need others http method(GET, PUT, DELETE)?

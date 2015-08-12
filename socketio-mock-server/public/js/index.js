@@ -1,6 +1,6 @@
 function init() {
 
-    var room = window.location.search.match(/room=(\d+)/)[1] || 123,
+    var room = (window.location.search.match(/room=(\d+)/) || [])[1] || 123,
         socket = io.connect('http://127.0.0.1:8080', {
             port: 8080,
             rememberTransport: false
@@ -31,14 +31,17 @@ function init() {
     });
 
     $('#send').on('click', function() {
-        socket.emit($('#type').val(), {
-            data: {
-                message: $('#message').val()
+        var name = $('#type').val(),
+            data = {
+                data: {
+                    message: $('#message').val()
 
-            },
-            room: room,
-            token: token
-        });
+                },
+                room: room,
+                token: token
+            };
+        console.log('send message to websocket', event, data);
+        socket.emit(name, data);
     });
 
     socket.on('joinRoom', function(data) {

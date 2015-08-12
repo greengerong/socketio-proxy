@@ -6,8 +6,25 @@ var express = require("express"),
     io = require("socket.io").listen(http, {
         // origins: '*:*'
     }),
+    util = require('util'),
+    fs = require('fs'),
     proxy = require('./proxy'),
     authentificationSockets = {}; // 这里的key（token），如果选择分离到第三方平台，则还可以获取到ngnix自由代理的多台、多进程扩展。
+
+if (!fs.existsSync('.tmp')) {
+    fs.mkdirSync('.tmp');
+}
+
+var log = require('bunyan').createLogger({
+    name: 'socketio-proxy',
+    streams: [{
+        level: 'info',
+        stream: process.stdout // log INFO and above to stdout
+    }, {
+        level: 'warn',
+        path: '.tmp/socketio-proxy.log' // log ERROR and above to a file
+    }]
+});
 
 app.set("ipaddr", process.env.ip || "127.0.0.1");
 app.set("port", process.env.port || 8080);
@@ -22,7 +39,7 @@ app.get("/", function(req, res) {
     res.send({
         name: 'socketio proxy',
         alive: true,
-        script: req.protocol + '://' + req.get('Host') + req.url + "socket.io/socket.io.js",
+        script: util.format('%s://%s%ssocket.io/socket.io.js', req.protocol, req.get('Host'), req.url),
         author: {
             name: 'greengerong',
             github: 'https://github.com/greengerong/',
@@ -43,7 +60,7 @@ if (notification.enable === true) {
                     req.socket.remoteAddress ||
                     req.connection.socket.remoteAddress;
             };
-            console.log('Wrong notification from ' + getClientIp(req));
+            log.error('Wrong notification from %s', getClientIp(req));
             res.status(401).send({
                 success: false,
                 error: 'Wrong notification!'
@@ -73,7 +90,7 @@ if (notification.enable === true) {
         io.to(notify.room).emit(notify.event, palyload.data);
         res.send({
             success: true,
-            message: 'Notify the client ' + notify.room + ' (' + notify.event + ') with :' + JSON.stringify(palyload.data) + '!'
+            message: util.format('Notify the client %s(%s) with: %s!', notify.room, notify.event, JSON.stringify(palyload.data))
         });
     });
 }
@@ -90,10 +107,10 @@ io.on("connection", function(socket) {
     socket.on(join.src, function(data) {
 
         var url = setting.baseUrl + join.target;
-        console.log('Got ' + join.src + ' will ask server url ' + url, data);
+        log.info(data, 'Got %s will ask server url %s', join.src, url);
         proxy(url, data, function(err, result) {
             if (err) {
-                console.log('Proxy to server to join room error:', err);
+                log.error(err, 'Proxy to server to join room error.');
                 return socket.emit(join.src + '-error', {
                     success: false,
                     error: err
@@ -102,6 +119,7 @@ io.on("connection", function(socket) {
             var notify = result.notify;
             if (!notify.identity) {
                 var msg = 'The server api didn\'t given identity to this socket!';
+                log.info(notify, msg);
                 return socket.emit(join.src + '-error', {
                     success: false,
                     error: msg
@@ -112,10 +130,10 @@ io.on("connection", function(socket) {
 
             if (notify.room) {
                 socket.join(notify.room);
-                console.log('User join room ' + notify.room);
+                log.info('User join room %s.', notify.room);
             }
 
-            console.log('Join socket connection success.');
+            log.info('Join socket connection success.');
             socket.emit(join.src, {
                 success: true,
                 token: notify.identity
@@ -127,7 +145,7 @@ io.on("connection", function(socket) {
     _.forEach(mapping, function(item) {
         item.target = item.target || item.src;
         var url = setting.baseUrl + item.target;
-        console.log('Socket on event ' + item.src);
+        log.info('Socket on event %s', item.src);
         socket.on(item.src, function(data) {
 
             var isAuthorize = _.chain(authentificationSockets).some(function(value, key) {
@@ -143,11 +161,11 @@ io.on("connection", function(socket) {
                 });
             }
             authentificationSockets[data.token] = socket;
-            console.log('Got socket event ' + item.src + ' to url ' + url, data);
+            log.info(data, 'Got socket event %s to url %s.', item.src, url);
 
             proxy(url, data, function(err, result) {
                 if (err) {
-                    console.log('API service response error:', err);
+                    log.error(err, 'API service response error on %s event.', item.src);
                     return socket.emit(item.src + '-error', err);
                 }
 
@@ -161,12 +179,12 @@ io.on("connection", function(socket) {
                             }).emit(item.src, result.data);
                         }).value()
 
-                    console.log('Emit data to identitys ' + notify.identitys);
+                    log.info(notify, 'Emit data to identitys %s', notify.identitys);
                 }
 
                 if (notify.room) {
                     io.to(notify.room).emit(item.src, result.data);
-                    console.log('Emit data to room ' + notify.room);
+                    log.info(notify, 'Emit data to room ' + notify.room);
                 }
 
                 if ((!notify.identitys || !notify.identitys.lenth) && !notify.room) {
@@ -195,10 +213,10 @@ io.on("connection", function(socket) {
             .value();
 
         if (identity) {
-            console.log('disconnect: identity ' + identity);
+            log.info('disconnect: identity %s.', identity);
             authentificationSockets[identity] = null;
         };
-        console.log('disconnect: leave room');
+        log.info('disconnect: leave room');
         socket.leaveAll();
     });
 
@@ -212,5 +230,5 @@ io.on("connection", function(socket) {
 });
 
 http.listen(app.get("port"), app.get("ipaddr"), function() {
-    console.log("Socketio proxy server up and running on: http://" + app.get("ipaddr") + ":" + app.get("port"));
+    console.log(util.format("Socketio proxy server up and running on: http://%s:%s", app.get("ipaddr"), app.get("port")));
 });
