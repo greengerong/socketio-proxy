@@ -6,7 +6,11 @@ import nodemon from 'gulp-nodemon';
 gulp.task('proxyServer', (cb) => {
     var started = false;
     return nodemon({
+        execMap: {
+            "js": "node --harmony"
+        },
         script: './server.js',
+        ext: 'js json',
         env: {
             'NODE_ENV': 'development',
             'setting': './setting/setting.json'
