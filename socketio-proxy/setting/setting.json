@@ -3,7 +3,7 @@
     "timeout": 600000,
     "notification": {
         "enable": true,
-        "tokenName": "proxy-token",
+        "tokenName": "socketio-proxy-token",
         "token": "9090950"
     },
     "join": {

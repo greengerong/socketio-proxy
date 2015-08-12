@@ -50,49 +50,54 @@ app.get("/", function(req, res) {
 
 var setting = app.get("proxySetting") || {},
     notification = setting.notification || {};
+
 if (notification.enable === true) {
+    notification.tokenName = notification.tokenName || 'socketio-proxy-token';
     app.post("/api/v1/notification", function(req, res, next) {
-        if (notification.token && req.headers[notification.tokenName || 'proxy-token'] !== notification.token) {
+            var requestToken = req.headers[notification.tokenName],
+                clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
 
-            var getClientIp = function(req) {
-                return req.headers['x-forwarded-for'] ||
-                    req.connection.remoteAddress ||
-                    req.socket.remoteAddress ||
-                    req.connection.socket.remoteAddress;
-            };
-            log.error('Wrong notification from %s', getClientIp(req));
-            res.status(401).send({
-                success: false,
-                error: 'Wrong notification!'
-            })
-        }
+            log.info('Request notification from %s with token %s', clientIp, requestToken);
+            if (notification.token && (requestToken !== notification.token)) {
 
-        next();
-    }, function(req, res) {
-        /* {
-             notify: {
-                 room: '123',
-                 event: 'update-message'
-             },
-             data: {
-                 // some data  to notify client
-             }
-         }*/
-        var palyload = req.body,
-            notify = palyload.notify;
-        if (!notify.room || !notify.event) {
-            return res.status(400).send({
-                success: false,
-                message: 'Should given notify client and event name!'
+                log.error('Wrong notification from %s with token %s!', clientIp, requestToken);
+                return res.status(401).send({
+                    success: false,
+                    error: 'Wrong notification!'
+                })
+            }
+
+            next();
+        },
+        function(req, res) {
+            /* {
+                 notify: {
+                     room: '123',
+                     event: 'update-message'
+                 },
+                 data: {
+                     // some data  to notify client
+                 }
+             }*/
+            var palyload = req.body,
+                notify = palyload.notify;
+            if (!notify.room || !notify.event) {
+                return res.status(400).send({
+                    success: false,
+                    message: 'Should given notify client and event name!'
+                });
+            }
+
+            io.to(notify.room).emit(notify.event, palyload.data);
+            var msg = util.format('Notify the client %s(%s)!', notify.room, notify.event);
+            log.info({
+                data: palyload.data
+            }, msg);
+            res.send({
+                success: true,
+                message: msg
             });
-        }
-
-        io.to(notify.room).emit(notify.event, palyload.data);
-        res.send({
-            success: true,
-            message: util.format('Notify the client %s(%s) with: %s!', notify.room, notify.event, JSON.stringify(palyload.data))
         });
-    });
 }
 
 io.on("connection", function(socket) {
