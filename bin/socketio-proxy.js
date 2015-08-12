@@ -1,5 +1,10 @@
 #!/usr/bin/env node
 
 'use strict';
+var argv = process.argv.slice(2),
+    setting = argv[0];
 
-require('../server.js')();
+if (setting) {
+    process.env.setting = setting;
+}
+require('../server');
