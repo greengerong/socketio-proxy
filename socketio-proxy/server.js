@@ -232,7 +232,8 @@ io.on("connection", function(socket) {
             .value();
 
         if (identity) {
-            log.info('disconnect: identity %s.', identity);
+            // remove socket, wait for reconnection or timeout to remove auth;
+            log.info('disconnect: remove socket for identity %s.', identity);
             authentificationSockets[identity] = null;
         };
         log.info('disconnect: leave room');
