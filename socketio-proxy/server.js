@@ -7,7 +7,7 @@ var express = require("express"),
         // origins: '*:*'
     }),
     proxy = require('./proxy'),
-    authentificationSockets = {};
+    authentificationSockets = {}; // 这里的key（token），如果选择分离到第三方平台，则还可以获取到ngnix自由代理的多台、多进程扩展。
 
 app.set("ipaddr", process.env.ip || "127.0.0.1");
 app.set("port", process.env.port || 8080);
