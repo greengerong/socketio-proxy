@@ -4,7 +4,8 @@ function init() {
         socket = io.connect('http://127.0.0.1:8080', {
             port: 8080,
             rememberTransport: false
-        });
+        }),
+        token;
 
     socket.on('recommandation', function(data) {
         console.log('got recommandation from node proxy ', data);
@@ -31,9 +32,18 @@ function init() {
 
     $('#send').on('click', function() {
         socket.emit($('#type').val(), {
-            message: $('#message').val(),
-            room: room
+            data: {
+                message: $('#message').val()
+
+            },
+            room: room,
+            token: token
         });
+    });
+
+    socket.on('joinRoom', function(data) {
+        console.log('join room response ', data);
+        token = data.token;
     });
 
     socket.emit('joinRoom', {

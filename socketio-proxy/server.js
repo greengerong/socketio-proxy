@@ -6,7 +6,8 @@ var express = require("express"),
     io = require("socket.io").listen(http, {
         // origins: '*:*'
     }),
-    proxy = require('./proxy');
+    proxy = require('./proxy'),
+    authentificationSockets = {};
 
 app.set("ipaddr", process.env.ip || "127.0.0.1");
 app.set("port", process.env.port || 8080);
@@ -99,20 +100,25 @@ io.on("connection", function(socket) {
                 });
             }
             var notify = result.notify;
-            if (!notify.room) {
-                var msg = 'No room for this socket!';
+            if (!notify.identity) {
+                var msg = 'The server api didn\'t given identity to this socket!';
                 return socket.emit(join.src + '-error', {
                     success: false,
                     error: msg
                 });
             }
 
-            socket.join(notify.room);
-            var msg = 'User join room ' + notify.room;
-            console.log(msg);
+            authentificationSockets[notify.identity] = socket;
+
+            if (notify.room) {
+                socket.join(notify.room);
+                console.log('User join room ' + notify.room);
+            }
+
+            console.log('Join socket connection success.');
             socket.emit(join.src, {
                 success: true,
-                room: notify.room
+                token: notify.identity
             });
         });
 
@@ -123,40 +129,85 @@ io.on("connection", function(socket) {
         var url = setting.baseUrl + item.target;
         console.log('Socket on event ' + item.src);
         socket.on(item.src, function(data) {
+
+            var isAuthorize = _.chain(authentificationSockets).some(function(value, key) {
+                return key === data.token;
+            }).value();
+            if (!isAuthorize) {
+                var msg = 'You don\'t have authentification!';
+                return socket.emit(item.src + '-error', {
+                    success: false,
+                    error: msg
+                }, function() {
+                    socket.disconnect();
+                });
+            }
+            authentificationSockets[data.token] = socket;
             console.log('Got socket event ' + item.src + ' to url ' + url, data);
 
             proxy(url, data, function(err, result) {
                 if (err) {
-                    console.log('Proxy to server error:', err);
+                    console.log('API service response error:', err);
                     return socket.emit(item.src + '-error', err);
                 }
 
                 var notify = result.notify;
-                if (!notify.room) {
-                    var msg = 'No room for to emit!';
-                    return socket.emit(join.src + '-error', {
-                        success: false,
-                        error: msg
+
+                if (notify.identitys) {
+                    _.chain(notify.identitys)
+                        .forEach(function(identity) {
+                            (authentificationSockets[identity] || {
+                                emit: _.noop
+                            }).emit(item.src, result.data);
+                        }).value()
+
+                    console.log('Emit data to identitys ' + notify.identitys);
+                }
+
+                if (notify.room) {
+                    io.to(notify.room).emit(item.src, result.data);
+                    console.log('Emit data to room ' + notify.room);
+                }
+
+                if ((!notify.identitys || !notify.identitys.lenth) && !notify.room) {
+                    var msg = 'Success, but nothing to emit!';
+                    return socket.emit(item.src, {
+                        success: true,
+                        message: msg
                     });
                 }
 
-                io.to(notify.room).emit(item.src, result.data);
-                var msg = 'emit data to room ' + notify.room;
-                console.log(msg);
-                socket.emit(join.src, {
-                    success: true,
-                    message: msg
-                });
+                // return socket.emit(item.src, {
+                //     success: true,
+                //     message: 'Success!'
+                // });
             });
         });
     })
 
 
 
-    socket.on("disconnect", function(data) {
-        console.log('disconnect: lave room', data);
+    socket.on("disconnect", function() {
+        var identity = _.chain(authentificationSockets)
+            .findKey(function(value) {
+                return value === socket;
+            })
+            .value();
+
+        if (identity) {
+            console.log('disconnect: identity ' + identity);
+            authentificationSockets[identity] = null;
+        };
+        console.log('disconnect: leave room');
         socket.leaveAll();
     });
+
+    //settimeout remove identity is null;
+    setTimeout(function() {
+
+    }, (app.get("proxySetting") || {
+        timeout: 30 * 1000
+    }).timeout);
 
 });
 

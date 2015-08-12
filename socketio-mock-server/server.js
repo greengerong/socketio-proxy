@@ -1,7 +1,8 @@
 var express = require("express"),
     app = express(),
     http = require("http").createServer(app),
-    bodyParser = require("body-parser");
+    bodyParser = require("body-parser"),
+    guid = require("guid");
 
 app.set("ipaddr", "127.0.0.1");
 
@@ -23,11 +24,11 @@ app.get("/", function(req, res) {
 
 ////////////////////////////////////////////////////
 //TODO: test post api;
-var resRoom = 'room1';
 app.post("/joinRoom", function(req, res) {
     console.log('In test server api joinRoom', req.body);
     res.send({
         notify: {
+            identity: guid.raw(), // identity for special notify and auth valdation for web socket.
             room: req.body.room
         }
     });
@@ -42,7 +43,7 @@ app.post("/recommandation", function(req, res) {
         notify: {
             room: req.body.room
         },
-        data: req.body
+        data: req.body.data
     });
 
 });
@@ -53,7 +54,7 @@ app.post("/comment", function(req, res) {
         notify: {
             room: req.body.room
         },
-        data: req.body
+        data: req.body.data
     });
 });
 
