@@ -17,10 +17,6 @@ run mock demo server :
 
 Task:
 
-1. socket connection auth.
+* change to good log lib.
 
-2. change to good log lib.
-
-3. think about the proxy http request need others http method(GET, PUT, DELETE)?
-
-4. not only room notify, will be include special socket.
+* think about the proxy http request need others http method(GET, PUT, DELETE)?
