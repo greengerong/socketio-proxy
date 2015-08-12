@@ -2,3 +2,4 @@ socketio-mock-server/node_modules
 node_modules
 *.iml
 .idea
+.tmp
