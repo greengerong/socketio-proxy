@@ -9,3 +9,5 @@
 {"name":"socketio-proxy","hostname":"CNzxgerong.local","pid":49764,"level":50,"msg":"Wrong notification from 127.0.0.1 with token undefined!","time":"2015-08-12T06:06:03.777Z","v":0}
 {"name":"socketio-proxy","hostname":"CNzxgerong.local","pid":51509,"level":50,"msg":"Wrong notification from 127.0.0.1 with token 9090950xx!","time":"2015-08-12T06:12:53.431Z","v":0}
 {"name":"socketio-proxy","hostname":"CNzxgerong.local","pid":52765,"level":50,"msg":"Wrong notification from 127.0.0.1 with token 9090950x!","time":"2015-08-12T06:18:43.825Z","v":0}
+{"name":"socketio-proxy","hostname":"CNzxgerong.local","pid":64819,"level":50,"msg":"Wrong notification from 127.0.0.1 with token 9090950x!","time":"2015-08-12T07:16:51.562Z","v":0}
+{"name":"socketio-proxy","hostname":"CNzxgerong.local","pid":68486,"level":50,"msg":"Wrong notification from 127.0.0.1 with token 9090950xx!","time":"2015-08-12T07:40:47.656Z","v":0}
