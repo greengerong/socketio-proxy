@@ -20,3 +20,6 @@ Task:
 * think about the proxy http request need others http method(GET, PUT, DELETE)?
 
 * document should be update.
+
+
+node ./node_modules/socketio-proxy/bin/socketio-proxy.js setting.json | ./node_modules/bunyan/bin/bunyan
